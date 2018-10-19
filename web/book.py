@@ -10,7 +10,7 @@ from websafaribooks import WebSafariBooks
 
 class Args:
     def __init__(self):
-        self.cred = 'nguyen.van.ba@linecorp.com:bak48cadhcn'
+        self.cred = ''
         self.no_cookies = False
         self.no_kindle = False
         self.log = True
