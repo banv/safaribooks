@@ -1,0 +1,8 @@
+Books/**
+*.pyc
+web/venv/*
+web/log/*
+web/Books/*
+web/.idea/*
+log/*
+book2/*

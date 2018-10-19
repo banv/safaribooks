@@ -266,7 +266,7 @@ class SafariBooks:
 
     def __init__(self, args):
         self.args = args
-        self.display = Display("log/info_%s.log" % escape(args.bookid))
+        self.display = Display("info_%s.log" % escape(args.bookid))
         self.display.intro()
 
         self.cookies = {}
@@ -370,8 +370,7 @@ class SafariBooks:
       mobi_file = os.path.join(self.BOOK_PATH, self.book_id + ".mobi")
       covert_opts = "--mobi-ignore-margin"
       convert_app = "/Applications/calibre.app/Contents/console.app/Contents/MacOS/ebook-convert"
-      log_opts = "2>log/mobi_" + str(self.book_id) + ".log"
-      command = convert_app + " \"" + epub_file + "\" \"" + mobi_file + "\" " + covert_opts + " "  + log_opts
+      command = convert_app + " \"" + epub_file + "\" \"" + mobi_file + "\" " + covert_opts
       self.display.info("Command: %s" % command, state=True)
       os.system(command)
 

@@ -1,0 +1,77 @@
+<html>
+    <head>
+        <title>Book management</title>
+      <meta http-equiv="cache-control" content="no-cache"> <!-- tells browser not to cache -->
+      <meta http-equiv="expires" content="0"> <!-- says that the cache expires 'now' -->
+      <meta http-equiv="pragma" content="no-cache"> <!-- says not to use cached stuff, if there is any -->
+
+          <meta charset="utf-8">
+      <script src="https://ajax.googleapis.com/ajax/libs/jquery/3.3.1/jquery.min.js"></script>
+      <link rel="stylesheet" type="text/css" href="{{ url_for ('static', filename='common.css') }}">
+
+
+
+    </head>
+    <body>
+
+    <h2>Add book:</h2>
+<form id="frm_addbook" action="/validate">
+    <input type="text" id="bookid" size=15/>
+    <input type="submit" value="Add to queue"/>
+</form>
+
+<pre id='validate_result'>validate result show here</pre>
+    <div id="loading">
+      <img src="{{ url_for('static', filename='reload.gif')}}"/></div>
+
+
+
+
+
+<hr/>
+    <h2>List book</h2>
+    <span>Total: </span><span id="totalbook">{{total}}</span>
+    <form id="frm_listbook" action="#">
+    <div style="overflow-x:auto;">
+    <table id="tbl_listbook">
+      <thead>
+        <tr>
+          <th>Added Date</th>
+          <th>Book ID</th>
+          <th>Book title</th>
+          <th>Author</th>
+          <th>Publish date</th>
+          <th>URL</th>
+          <th>Status</th>
+          <th>Local Path</th>
+          <th><input type="checkbox" id="chkParent" /></th>
+        </tr>
+      </thead>
+      <tbody>
+
+      {% for book in listbook %}
+      <tr id="tr_{{book['identifier']}}">
+        <td>{{book['addedDate']}}</td>
+        <td>{{book['identifier']}}</td>
+        <td>{{book['title']}}</td>
+        <td>{{book['authorsName']}}</td>
+        <td>{{book['issued']}}</td>
+        <td><a target="_blank" href="{{book['web_url']}}">{{book['web_url']}}</a></td>
+        <td name="downloadStatus"><a target="_blank" href="/log?bookid={{book['identifier']}}">{{book['downloadStatus']}}</a></td>
+        <td name="downloadPath">{{book['downloadPath']}}</td>
+        <td><input type="checkbox" name="select_book" value="{{book['identifier']}}"></td>
+      </tr>
+      {% endfor %}
+      </tbody>
+
+
+    </table>
+      <input type="button" id="delete_book" value="Delete"/> &nbsp;
+      <input type="button" id="redownload_book" value="Redownload"/>
+    </div>
+    </form>
+
+    <script src="{{ url_for('static', filename='book.js') }}"></script>
+
+    </body>
+</html>

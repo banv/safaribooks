@@ -162,9 +162,9 @@ class Display:
 
         else:
             os.remove(COOKIES_FILE)
-            message += "Out-of-Session%s.\n" % (" (%s)" % response["detail"]) if "detail" in response else "" +\
-                       Display.SH_YELLOW + "[+]" + Display.SH_DEFAULT + \
-                       " Use the `--cred` option in order to perform the auth login to Safari Books Online."
+            message += "Out-of-Session%s.\n" % (" (%s)" % response["detail"]) if "detail" in response else "" + \
+                                                                                                           Display.SH_YELLOW + "[+]" + Display.SH_DEFAULT + \
+                                                                                                           " Use the `--cred` option in order to perform the auth login to Safari Books Online."
 
         return message
 
@@ -228,7 +228,7 @@ class SafariBooks:
     CONTENT_OPF = "<?xml version=\"1.0\" encoding=\"UTF-8\"?>\n" \
                   "<package xmlns=\"http://www.idpf.org/2007/opf\" unique-identifier=\"bookid\" version=\"2.0\" >\n" \
                   "<metadata xmlns:dc=\"http://purl.org/dc/elements/1.1/\" " \
-                  " xmlns:opf=\"http://www.idpf.org/2007/opf\">\n"\
+                  " xmlns:opf=\"http://www.idpf.org/2007/opf\">\n" \
                   "<dc:title>{1}</dc:title>\n" \
                   "{2}\n" \
                   "<dc:description>{3}</dc:description>\n" \
@@ -286,7 +286,9 @@ class SafariBooks:
 
         self.book_id = args.bookid
         self.api_url = self.API_TEMPLATE.format(self.book_id)
+        # self.run(args)
 
+    def run(self, args):
         self.display.info("Retrieving book info...")
         self.book_info = self.get_book_info()
         self.display.book_info(self.book_info)
@@ -356,26 +358,27 @@ class SafariBooks:
         self.display.unregister()
 
         if args.mobi:
-          self.display.info("Creating MOBI file...", state=True)
-          self.convert_mobi()
+            self.display.info("Creating MOBI file...", state=True)
+            self.convert_mobi()
 
 
         if not self.display.in_error and not args.log:
             os.remove(self.display.log_file)
 
-        sys.exit(0)
+        return os.path.join(self.BOOK_PATH, self.book_id + ".epub")
+        # sys.exit(0)
 
     def convert_mobi(self):
-      epub_file = os.path.join(self.BOOK_PATH, self.book_id + ".epub")
-      mobi_file = os.path.join(self.BOOK_PATH, self.book_id + ".mobi")
-      covert_opts = "--mobi-ignore-margin"
-      convert_app = "/Applications/calibre.app/Contents/console.app/Contents/MacOS/ebook-convert"
-      log_opts = "2>log/mobi_" + str(self.book_id) + ".log"
-      command = convert_app + " \"" + epub_file + "\" \"" + mobi_file + "\" " + covert_opts + " "  + log_opts
-      self.display.info("Command: %s" % command, state=True)
-      os.system(command)
+        epub_file = os.path.join(self.BOOK_PATH, self.book_id + ".epub")
+        mobi_file = os.path.join(self.BOOK_PATH, self.book_id + ".mobi")
+        covert_opts = "--mobi-ignore-margin"
+        convert_app = "/Applications/calibre.app/Contents/console.app/Contents/MacOS/ebook-convert"
+        log_opts = "2>log/mobi_" + str(self.book_id) + ".log"
+        command = convert_app + " \"" + epub_file + "\" \"" + mobi_file + "\" " + covert_opts + " "  + log_opts
+        self.display.info("Command: %s" % command, state=True)
+        os.system(command)
 
-    
+
 
     def return_cookies(self):
         return " ".join(["{0}={1};".format(k, v) for k, v in self.cookies.items()])
@@ -475,11 +478,11 @@ class SafariBooks:
                 errors_message = error_page.xpath("//ul[@class='errorlist']//li/text()")
                 recaptcha = error_page.xpath("//div[@class='g-recaptcha']")
                 messages = (["    `%s`" % error for error in errors_message
-                            if "password" in error or "email" in error] if len(errors_message) else []) +\
+                             if "password" in error or "email" in error] if len(errors_message) else []) + \
                            (["    `ReCaptcha required (wait or do logout from the website).`"] if len(recaptcha) else[])
                 self.display.exit("Login: unable to perform auth login to Safari Books Online.\n" +
                                   self.display.SH_YELLOW + "[*]" + self.display.SH_DEFAULT + " Details:\n"
-                                  "%s" % "\n".join(messages if len(messages) else ["    Unexpected error!"]))
+                                                                                             "%s" % "\n".join(messages if len(messages) else ["    Unexpected error!"]))
             except (html.etree.ParseError, html.etree.ParserError) as parsing_error:
                 self.display.error(parsing_error)
                 self.display.exit(
@@ -490,11 +493,12 @@ class SafariBooks:
     def get_book_info(self):
         response = self.requests_provider(self.api_url)
         if response == 0:
+            return response
             self.display.exit("API: unable to retrieve book info.")
 
         response = response.json()
-        if not isinstance(response, dict) or len(response.keys()) == 1:
-            self.display.exit(self.display.api_error(response))
+        # if not isinstance(response, dict) or len(response.keys()) == 1:
+        #     self.display.exit(self.display.api_error(response))
 
         if "last_chapter_read" in response:
             del response["last_chapter_read"]
@@ -743,7 +747,7 @@ class SafariBooks:
 
     def save_page_html(self, contents):
         self.filename = self.filename.replace(".html", ".xhtml")
-        open(os.path.join(self.BOOK_PATH, "OEBPS", self.filename), "wb")\
+        open(os.path.join(self.BOOK_PATH, "OEBPS", self.filename), "wb") \
             .write(self.BASE_HTML.format(contents[0], contents[1]).encode("utf-8", 'xmlcharrefreplace'))
         self.display.log("Created: %s" % self.filename)
 
@@ -927,9 +931,9 @@ class SafariBooks:
             r += "<navPoint id=\"{0}\" playOrder=\"{1}\">" \
                  "<navLabel><text>{2}</text></navLabel>" \
                  "<content src=\"{3}\"/>".format(
-                    cc["fragment"] if len(cc["fragment"]) else cc["id"], c,
-                    escape(cc["label"]), cc["href"].replace(".html", ".xhtml").split("/")[-1]
-                 )
+                cc["fragment"] if len(cc["fragment"]) else cc["id"], c,
+                escape(cc["label"]), cc["href"].replace(".html", ".xhtml").split("/")[-1]
+            )
 
             if cc["children"]:
                 sr, c, mx = SafariBooks.parse_toc(cc["children"], c, mx)
